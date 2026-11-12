@@ -1,0 +1,130 @@
+/* Two-pane launcher using the Quickshell Theme.qml grayscale palette */
+
+* {
+    bg:      #0C0C0CE6;
+    surface: #2C2C2C;
+    border:  #4E4E4E;
+    dim:     #747474;
+    muted:   #A4A4A4;
+    fg:      #DFDFDF;
+    accent:  #FFFFFF;
+
+    font: "JetBrainsMono Nerd Font 12";
+    background-color: transparent;
+    text-color: @fg;
+    margin: 0;
+    padding: 0;
+    spacing: 0;
+}
+
+window {
+    location: center;
+    anchor: center;
+    width: 1000px;
+    height: 494px;
+    background-color: @bg;
+    border: 1px;
+    border-color: @border;
+    border-radius: 12px;
+}
+
+mainbox {
+    orientation: horizontal;
+    children: [ "imagebox", "listbox" ];
+}
+
+/* ── Left pane ── */
+imagebox {
+    expand: false;
+    width: 500px;
+    orientation: vertical;
+    padding: 20px;
+    spacing: 20px;
+    background-image: url("~/.config/rofi/saturn.png", height);
+    children: [ "inputbar", "dummy", "mode-switcher" ];
+}
+
+dummy { expand: true; }
+
+inputbar {
+    padding: 14px 16px;
+    spacing: 12px;
+    border-radius: 8px;
+    background-color: #0C0C0Cd9;
+    children: [ "textbox-prompt", "entry" ];
+}
+
+textbox-prompt {
+    expand: false;
+    str: "  ";
+    text-color: @muted;
+    vertical-align: 0.5;
+}
+
+entry {
+    placeholder: "Search";
+    placeholder-color: @dim;
+    cursor-color: @accent;
+}
+
+mode-switcher { spacing: 10px; }
+
+button {
+    padding: 14px 0px;
+    border-radius: 8px;
+    horizontal-align: 0.5;
+    background-color: #0C0C0Cd9;
+    text-color: @muted;
+    cursor: pointer;
+}
+
+button selected {
+    background-color: @accent;
+    text-color: @bg;
+}
+
+/* ── Right pane ── */
+listbox {
+    padding: 20px;
+    spacing: 12px;
+    children: [ "message", "listview" ];
+}
+
+message {
+    padding: 12px 16px;
+    border-radius: 8px;
+    background-color: @surface;
+}
+
+textbox { text-color: @fg; }
+
+listview {
+    columns: 1;
+    lines: 7;
+    fixed-height: true;
+    scrollbar: false;
+    spacing: 10px;
+    cycle: true;
+}
+
+element {
+    padding: 8px 12px;
+    spacing: 16px;
+    border-radius: 8px;
+    orientation: horizontal;
+}
+
+element selected.normal {
+    background-color: @accent;
+    text-color: @bg;
+}
+
+element-icon {
+    size: 32px;
+    vertical-align: 0.5;
+}
+
+element-text {
+    vertical-align: 0.5;
+    text-color: inherit;
+}

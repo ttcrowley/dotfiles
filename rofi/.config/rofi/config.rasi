@@ -1,0 +1,12 @@
+configuration {
+    modi: "drun,filebrowser,calc";
+    show-icons: true;
+    icon-theme: "HighContrast";
+    drun-display-format: "{name}";
+
+    display-drun: "Apps";
+    display-filebrowser: "Files";
+    display-calc: "Calc";
+}
+
+@theme "~/.config/rofi/launcher.rasi"

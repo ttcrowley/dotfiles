@@ -1,0 +1,12 @@
+# caches and generated stuff
+**/cache/
+**/.cache/
+*.log
+*.bak
+*~
+
+# secrets, just in case
+*token*
+*secret*
+*credentials*
+*.env

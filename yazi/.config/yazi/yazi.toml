@@ -1,0 +1,14 @@
+
+[mgr]
+show_hidden = true
+
+[opener]
+play = [
+  { run = 'mpv %s', orphan = true, desc = "mpv", for = "unix" },
+]
+
+[open]
+prepend_rules = [
+  { mime = "video/*", use = "play" },
+  { mime = "audio/*", use = "play" },
+]

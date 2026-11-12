@@ -1,0 +1,147 @@
+/* Palette from Theme.qml */
+@define-color bg      #0C0C0C;
+@define-color surface #2C2C2C;
+@define-color border  #4E4E4E;
+@define-color dim     #747474;
+@define-color muted   #A4A4A4;
+@define-color fg      #DFDFDF;
+@define-color accent  #FFFFFF;
+@define-color warn    #F38BA8;
+
+/* Override Adwaita's named colors */
+@define-color theme_bg_color @bg;
+@define-color theme_base_color @bg;
+@define-color theme_fg_color @fg;
+@define-color theme_text_color @fg;
+@define-color theme_selected_bg_color @surface;
+@define-color theme_selected_fg_color @accent;
+@define-color theme_unfocused_bg_color @bg;
+@define-color theme_unfocused_base_color @bg;
+@define-color theme_unfocused_fg_color @muted;
+@define-color theme_unfocused_text_color @muted;
+@define-color insensitive_fg_color @dim;
+@define-color insensitive_bg_color @bg;
+@define-color borders @border;
+@define-color unfocused_borders @surface;
+@define-color warning_color @warn;
+@define-color error_color @warn;
+
+* { font-family: "JetBrainsMono Nerd Font"; outline-style: none; }
+
+window, .background, dialog { background-color: @bg; color: @fg; }
+
+/* Header / toolbars / status */
+headerbar, .titlebar, toolbar, statusbar {
+    background: @bg;
+    color: @fg;
+    border: none;
+    border-bottom: 1px solid @border;
+    box-shadow: none;
+}
+
+/* Sidebar (places) */
+.sidebar, placessidebar, placessidebar list, placessidebar row {
+    background-color: @bg;
+    color: @muted;
+}
+placessidebar row:hover { background-color: @surface; color: @fg; }
+placessidebar row:selected { background-color: @surface; color: @accent; }
+paned > separator { background-color: @border; min-width: 1px; }
+
+/* File view */
+treeview.view, iconview, .view {
+    background-color: @bg;
+    color: @fg;
+}
+.view:hover, iconview:hover { background-color: @surface; }
+.view:selected, iconview:selected, treeview.view:selected {
+    background-color: @surface;
+    color: @accent;
+}
+treeview.view header button {
+    background: @bg;
+    color: @muted;
+    border: none;
+    border-bottom: 1px solid @border;
+    border-radius: 0;
+}
+
+/* Buttons, path bar, entries */
+button {
+    background: @bg;
+    background-image: none;
+    color: @fg;
+    border: 1px solid @border;
+    border-radius: 0;
+    box-shadow: none;
+    text-shadow: none;
+}
+button:hover { background: @surface; color: @accent; }
+button:active, button:checked { background: @surface; border-color: @muted; color: @accent; }
+button:disabled { color: @dim; border-color: @surface; }
+
+entry, spinbutton {
+    background: @bg;
+    color: @fg;
+    border: 1px solid @border;
+    border-radius: 0;
+    box-shadow: none;
+}
+entry:focus, spinbutton:focus { border-color: @muted; }
+selection, *:selected { background-color: @surface; color: @accent; }
+
+/* Menus, popovers, tooltips */
+menu, .menu, popover, popover.background, .popup {
+    background: @bg;
+    color: @fg;
+    border: 1px solid @border;
+    border-radius: 0;
+    box-shadow: none;
+}
+menuitem:hover, modelbutton:hover { background: @surface; color: @accent; }
+menuitem:disabled { color: @dim; }
+separator { background-color: @border; }
+tooltip, tooltip.background {
+    background: @bg;
+    color: @fg;
+    border: 1px solid @border;
+    border-radius: 0;
+}
+
+/* Scrollbars */
+scrollbar { background: transparent; border: none; }
+scrollbar slider { background-color: @border; border-radius: 0; min-width: 6px; min-height: 6px; }
+scrollbar slider:hover { background-color: @muted; }
+
+/* Progress (copy/move dialogs) */
+progressbar trough { background: @surface; border: none; min-height: 4px; }
+progressbar progress { background: @accent; border: none; min-height: 4px; }
+
+/* Monochrome glyphs in toolbar, path bar, sidebar, menus */
+toolbar button image,
+headerbar button image,
+placessidebar image,
+menuitem image,
+modelbutton image {
+    -gtk-icon-style: symbolic;
+    color: @muted;
+}
+button:hover image { color: @accent; }
+placessidebar row:selected image { color: @accent; }
+
+/* Menubar */
+menubar > menuitem { padding: 3px 8px; min-height: 0; }
+
+/* Toolbar / path bar buttons */
+button { padding: 2px 8px; min-height: 0; min-width: 0; }
+toolbar { padding: 2px 4px; }
+
+/* Location entry */
+entry { min-height: 0; padding: 3px 8px; }
+
+/* Sidebar rows */
+placessidebar row { min-height: 0; padding: 2px 8px; }
+placessidebar row image { margin-right: 4px; }
+
+/* Status bar */
+statusbar { padding: 2px 8px; min-height: 0; }

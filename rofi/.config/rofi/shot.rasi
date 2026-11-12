@@ -1,0 +1,42 @@
+/* Screenshot popup: three tiles in a row.
+   rofi -show shot -modi "shot:~/.config/rofi/scripts/shot.sh" -theme ~/.config/rofi/shot.rasi */
+
+@import "~/.config/rofi/launcher.rasi"
+
+window {
+    width: 540px;
+    height: 150px;
+}
+
+mainbox {
+    orientation: vertical;
+    padding: 20px;
+    children: [ "listview" ];
+}
+
+listview {
+    columns: 3;
+    lines: 1;
+    spacing: 12px;
+    fixed-height: true;
+    cycle: true;
+}
+
+element {
+    orientation: vertical;
+    padding: 26px 8px;
+    border: 2px;
+    border-color: @border;
+    border-radius: 8px;
+}
+
+element selected.normal {
+    border-color: @accent;
+}
+
+element-icon { size: 0px; }
+
+element-text {
+    horizontal-align: 0.5;
+    vertical-align: 0.5;
+}
