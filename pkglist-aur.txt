@@ -1,17 +1,12 @@
-adwaita-qt5
 adwaita-qt6
 bibata-cursor-theme
-catppuccin-gtk-theme-mocha
 downgrade
-gtk-engine-murrine
 lib32-nvidia-580xx-utils
 nvidia-580xx-dkms
 papirus-folders
-qt5ct-kde
 qt6ct-kde
 qview
 tela-icon-theme-git
-wlogout
 xdg-desktop-portal-termfilechooser-git
 yay-bin
 zsh-theme-powerlevel10k-git
