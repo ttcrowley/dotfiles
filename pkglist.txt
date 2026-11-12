@@ -52,9 +52,11 @@ linux-headers
 lsd
 lsp-plugins
 ly
+meson
 nano
 neovim
 networkmanager
+ninja
 noto-fonts
 ntfs-3g
 nvidia-settings

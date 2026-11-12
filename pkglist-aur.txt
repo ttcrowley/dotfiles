@@ -7,6 +7,6 @@ papirus-folders
 qt6ct-kde
 qview
 tela-icon-theme-git
-xdg-desktop-portal-termfilechooser-git
+xdg-desktop-portal-termfilechooser-hunkyburrito-git
 yay-bin
 zsh-theme-powerlevel10k-git
