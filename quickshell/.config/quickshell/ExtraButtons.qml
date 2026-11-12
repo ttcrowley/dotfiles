@@ -1,8 +1,9 @@
 import QtQuick
 
 // A single chevron button on the bar. Click it and the
-// orientation button slides out in-line (to the left on a horizontal bar,
-// upward on a vertical one). Click again to tuck them away.
+// notification bell and config (gear) buttons slide out in-line (to the left on a horizontal bar,
+// upward on a vertical one). Click again to tuck them away, or just move the
+// mouse off it: it hides itself after `hideDelay` ms.
 Item {
     id: root
 
@@ -17,6 +18,22 @@ Item {
     Connections {
         target: BarState
         function onVerticalChanged() { root.expanded = false }
+    }
+
+    // Auto-hide: collapse once the mouse has stayed off the drawer and the
+    // chevron for this long (ms). Moving back over it cancels the countdown.
+    property int hideDelay: 3000
+
+    // Stay open while one of the drawer's popups is showing, since the mouse
+    // is expected to be elsewhere then.
+    readonly property bool busy: configMenu.open || NotifState.historyOpen
+
+    HoverHandler { id: hover }
+
+    Timer {
+        interval: root.hideDelay
+        running: root.expanded && !hover.hovered && !root.busy
+        onTriggered: root.expanded = false
     }
 
     Grid {
@@ -53,7 +70,8 @@ Item {
                 horizontalItemAlignment: Grid.AlignHCenter
                 verticalItemAlignment: Grid.AlignVCenter
 
-                OrientationButton {}
+                NotificationBell {}
+                ConfigMenu { id: configMenu }
             }
         }
 
@@ -71,6 +89,21 @@ Item {
                 color: area.containsMouse || root.expanded ? Theme.fg : Theme.dim
                 font { family: Theme.font; pixelSize: Theme.fontSize + 2 }
                 Behavior on color { ColorAnimation { duration: 150 } }
+            }
+
+            // Unread notifications while the drawer is tucked away
+            Rectangle {
+                visible: !root.expanded && NotifState.unread > 0
+                width: 6
+                height: 6
+                radius: 3
+                color: Theme.fg
+                anchors {
+                    right: parent.right
+                    rightMargin: -3
+                    top: parent.top
+                    topMargin: -1
+                }
             }
 
             MouseArea {

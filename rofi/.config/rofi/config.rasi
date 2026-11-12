@@ -7,6 +7,10 @@ configuration {
     display-drun: "Apps";
     display-filebrowser: "Files";
     display-calc: "Calc";
+
+    hover-select: true;
+    me-select-entry: "";
+    me-accept-entry: "MousePrimary";
 }
 
 @theme "~/.config/rofi/launcher.rasi"
