@@ -456,7 +456,7 @@ hl.window_rule({
 hl.window_rule ({
 	name = "obsidian_t",
 	match = {class = "^(md.obsidian.Obsidian)$"},
-	opacity = 0.95,
+	opacity = 0.96,
 })
 
 

@@ -58,6 +58,7 @@ rules = [
   # Sensitive folders
   { url = "**/.config/",   fg = "#C78A8E", bold = true },
   { url = "**/.ssh/",      fg = "#C78A8E", bold = true },
+  { url = "**/dotfiles/",      fg = "#C78A8E", bold = true },
 
   # Media folders
   { url = "**/Imagens/",  fg = "#C2B67E", bold = true },
@@ -112,6 +113,7 @@ dirs  = [
 	{ name = "Imagens", text = "" },
 	{ name = "Público", text = "" },
 	{ name = "Vídeos", text = "" },
+	{ name = "dotfiles", text = "󰦛"}
 ]
 files = [
 	{ name = ".babelrc", text = "" },
