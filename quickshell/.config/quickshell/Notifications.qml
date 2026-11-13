@@ -47,6 +47,7 @@ Scope {
 
     // Played when a popup appears (needs pw-play or paplay).
     property string soundFile: Quickshell.shellDir + "/sounds/thock.wav"
+    property real soundVolume: 0.1   // 0.0 – 1.0 (1.0 = original loudness)
 
     // History panel geometry. The offsets keep it clear of the bar:
     // horizontal bar = 6 + 34 + 8, vertical bar = 6 + 40 + 8.
@@ -134,7 +135,9 @@ Scope {
     // of notifications gives one thock instead of a stack of them.
     Process {
         id: sound
-        command: ["sh", "-c", "pw-play \"$1\" 2>/dev/null || paplay \"$1\" 2>/dev/null", "sh", root.soundFile]
+command: ["sh", "-c",
+    "pw-play --volume=\"$2\" \"$1\" 2>/dev/null || paplay --volume=\"$(awk \"BEGIN{printf \\\"%d\\\", $2*65536}\")\" \"$1\" 2>/dev/null",
+    "sh", root.soundFile, String(root.soundVolume)]
     }
 
     // Refresh the "2m" labels while the panel is open.
