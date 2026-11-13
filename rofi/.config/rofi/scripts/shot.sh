@@ -20,8 +20,8 @@ run_shot() {
         set -x
         sleep 0.35
         tmp=$(mktemp --suffix=.png)
-        hyprshot $ARGS --raw | tee "$tmp" | wl-copy --type image/png
-        [ -s "$tmp" ] || { rm -f "$tmp"; exit 1; }
+        hyprshot $ARGS --raw > "$tmp"
+	[ -s "$tmp" ] || { rm -f "$tmp"; exit 1; }
         satty --filename "$tmp" --early-exit --copy-command wl-copy \
               --output-filename "$SAVE_DIR/satty-$(date +%Y%m%d-%H%M%S).png"
         rm -f "$tmp"
