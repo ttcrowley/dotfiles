@@ -13,13 +13,19 @@ args_for() {
 }
 
 run_shot() {
-    local args cmd
+    local args
     args=$(args_for "$1")
     mkdir -p "$SAVE_DIR"
-    # hyprshot --raw prints the PNG to stdout; Satty reads it from stdin
-    cmd="hyprshot $args --raw | satty --filename - --early-exit --output-filename \"$SAVE_DIR/satty-\$(date +%Y%m%d-%H%M%S).png\""
-    # Detach and wait a moment so rofi is gone before the capture starts
-    setsid -f sh -c "sleep 0.35; $cmd" >/dev/null 2>&1
+    ARGS="$args" SAVE_DIR="$SAVE_DIR" setsid -f bash -c '
+        set -x
+        sleep 0.35
+        tmp=$(mktemp --suffix=.png)
+        hyprshot $ARGS --raw | tee "$tmp" | wl-copy --type image/png
+        [ -s "$tmp" ] || { rm -f "$tmp"; exit 1; }
+        satty --filename "$tmp" --early-exit --copy-command wl-copy \
+              --output-filename "$SAVE_DIR/satty-$(date +%Y%m%d-%H%M%S).png"
+        rm -f "$tmp"
+    ' >/tmp/shot.log 2>&1
 }
 
 case "$ROFI_INFO" in
