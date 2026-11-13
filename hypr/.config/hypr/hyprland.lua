@@ -51,14 +51,14 @@ hl.on("hyprland.start", function ()
    hl.exec_cmd("hypridle")
    hl.exec_cmd("LANG,pt_BR.UTF-8")
    hl.exec_cmd("/usr/lib/polkit-kde-authentication-agent-1")
-  -- hl.exec_cmd("~/.local/bin/waybar_timer serve & waybar")
    hl.exec_cmd("wl-paste --type text --watch cliphist store")
    hl.exec_cmd("wl-paste --type image --watch cliphist store")
---   hl.exec_cmd("~/.local/bin/waybar_timer serve & waybar")
    
 --Quicksheel
-
    hl.exec_cmd("qs")
+
+--Espanso
+hl.exec_cmd("espanso daemon")
 
  end)
 
@@ -332,7 +332,7 @@ hl.bind(mainMod .. "+ SPACE", hl.dsp.window.fullscreen({mode = "maximized", acti
 hl.bind(mainMod .. "+ SHIFT + SPACE", hl.dsp.window.fullscreen({mode = "fullscreen", action = "toggle"}))
 
 --cliphist
-hl.bind(mainMod .. " + V", hl.dsp.exec_cmd("cliphist list | rofi -dmenu -display-columns 2 | cliphist decode | wl-copy"))
+hl.bind(mainMod .. " + V", hl.dsp.exec_cmd("qs ipc call clipboard toggle"))
 
 -- Dock
 hl.bind(mainMod .."+ d", hl.dsp.exec_cmd("qs ipc call dock toggle"))

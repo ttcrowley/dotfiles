@@ -23,6 +23,52 @@ Item {
     readonly property int focusedId: Hyprland.focusedWorkspace?.id ?? -1
     readonly property var occupiedIds: Hyprland.workspaces.values.map(w => w.id)
 
+    // ── Alerts ──────────────────────────────────────────────
+    // Workspaces that want attention: { wsId: true }. Cleared when you visit them.
+    property var alerts: ({})
+    readonly property color alertColor: Theme.warn   // try Theme.yellow for something softer
+    readonly property int pulseMs: 1100
+
+	function alert(ws) {
+	    if (isNaN(ws) || ws === focusedId || alerts[ws] === true)
+		return;
+	    alerts = Object.assign({}, alerts, { [ws]: true });
+	}
+
+	function clearAlert(ws) {
+	    if (alerts[ws] !== true)
+		return;
+	    const next = Object.assign({}, alerts);
+	    delete next[ws];
+	    alerts = next;
+	}
+
+	onFocusedIdChanged: clearAlert(focusedId)
+
+	Connections {
+	    target: Hyprland
+
+	    function onRawEvent(event) {
+		// console.log("hypr:", event.name, event.data);   // uncomment to debug
+
+		// A window opened (e.g. Obsidian on another workspace).
+		// data = "address,workspaceName,class,title"
+		if (event.name === "openwindow") {
+		    root.alert(parseInt(event.data.split(",")[1]));
+		}
+		// A window asked for attention (e.g. a paused game wanting focus).
+		// data = window address
+		else if (event.name === "urgent") {
+		    const addr = event.data.trim().replace(/^0x/, "");
+		    const t = Hyprland.toplevels.values.find(
+			t => t.address.replace(/^0x/, "") === addr);
+		    if (t && t.workspace)
+			root.alert(t.workspace.id);
+		}
+	    }
+	}
+
+
     // Same visibility rule as before: 1-4 always, others if focused/occupied
     readonly property var shown: {
         const ids = [];
@@ -119,11 +165,35 @@ Item {
             x: root.px(root.slot * (index + 0.5), root.cross / 2) - width / 2
             y: root.py(root.slot * (index + 0.5), root.cross / 2) - height / 2
 
-            color: focused ? Theme.accent
-                 : occupied ? Theme.muted
-                 : Theme.border
-            Behavior on color { ColorAnimation { duration: 150 } }
-        }
+           readonly property bool alerted: root.alerts[wsId] === true && !focused
+	property real pulse: 0
+
+	color: alerted ? root.alertColor
+	     : focused ? Theme.accent
+	     : occupied ? Theme.muted
+	     : Theme.border
+	Behavior on color { ColorAnimation { duration: 150 } }
+
+	NumberAnimation on pulse {
+	    from: 0
+	    to: 1
+	    duration: root.pulseMs
+	    loops: Animation.Infinite
+	    running: dot.alerted
+	}
+
+// Expanding, fading ring
+Rectangle {
+    visible: dot.alerted
+    anchors.centerIn: parent
+    width: dot.width + 12 * dot.pulse
+    height: width
+    radius: width / 2
+    color: "transparent"
+    border.width: 1.5
+    border.color: root.alertColor
+    opacity: 1 - dot.pulse
+}        }
     }
 
     // ── Click targets ───────────────────────────────────────

@@ -236,6 +236,11 @@ Scope {
 
                     readonly property bool critical: modelData.urgency === NotificationUrgency.Critical
                     readonly property bool sticky: critical && modelData.expireTimeout <= 0
+                    
+                   // Popup lifetime in ms; the timer and the progress bar both use it.
+                   readonly property int timeout: modelData.expireTimeout > 0
+                   ? modelData.expireTimeout * 1000
+                   : root.defaultTimeout
 
                     // Only the newest `maxVisible` notifications may have a popup.
                     readonly property bool inWindow:
@@ -306,6 +311,38 @@ Scope {
                         HoverHandler {
                             id: hover
                         }
+
+
+			// Time-left bar: drains while the popup is counting down.
+			Rectangle {
+			    id: bar
+			    property real progress: 1
+
+			    visible: !entry.sticky
+			    x: root.radius
+			    y: parent.height - height - 4
+			    width: (parent.width - root.radius * 2) * progress
+			    height: 2
+			    radius: 1
+			    color: entry.critical ? Theme.warn : Theme.dim
+
+			    NumberAnimation on progress {
+				from: 1
+				to: 0
+				duration: entry.timeout
+				running: dismissTimer.running
+			    }
+
+    // Hovering pauses the Timer and restarts it from full afterwards,
+    // so the bar snaps back to full while hovered.
+    Connections {
+        target: hover
+        function onHoveredChanged() {
+            if (hover.hovered)
+                bar.progress = 1;
+        }
+    }
+}
 
                         // Left click: run the default action (if any) and dismiss.
                         // Right click: just hide the popup, keep it in history.
