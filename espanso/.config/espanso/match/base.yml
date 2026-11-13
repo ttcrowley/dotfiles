@@ -53,11 +53,7 @@ matches:
       
 # update pakcage lists
   - trigger: ":pkgs"
-    replace: |-
-      cd ~/dotfiles
-      pacman -Qqen > pkglist.txt
-      pacman -Qqem > pkglist-aur.txt
-      git add -A && git commit -m "Add package lists" && git push    
+    replace: 'cd ~/dotfiles && pacman -Qqen > pkglist.txt && pacman -Qqem > pkglist-aur.txt && git add -A && git commit -m "Add package lists" && git push'    
     force_mode: keys
 
 # And much more! For more information, visit the docs: https://espanso.org/docs/
