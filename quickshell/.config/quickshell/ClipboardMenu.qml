@@ -20,7 +20,9 @@ PanelWindow {
     property string query: ""
     property int cur: 0               // highlighted row
     property bool confirmWipe: false
-    property int thumbRev: 0          // bumped when image thumbnails are ready
+    property var thumbReady: ({})     // id -> true once the file exists
+    property var thumbWanted: []      // [{id, ext}] from the latest list
+    property var thumbInflight: []    // ids being decoded right now
 
     readonly property string thumbDir: (Quickshell.env("XDG_RUNTIME_DIR") || "/tmp") + "/qs-cliphist"
 
@@ -88,7 +90,9 @@ PanelWindow {
             confirmTimer.restart();
             return;
         }
-        confirmWipe = false;
+	confirmWipe = false;
+	thumbReady = ({});
+        thumbWanted = [];
         mutator.command = ["sh", "-c", 'cliphist wipe; rm -rf "$1"', "sh", thumbDir];
         mutator.running = true;
     }
@@ -134,19 +138,24 @@ PanelWindow {
                 ext: m ? m[2] : "",
                 info: m ? (m[1] + " · " + m[3]) : ""
             });
-            if (m && imgs.length < 40) imgs.push(id + ":" + m[2]);
+            if (m && imgs.length < 40) imgs.push({ id: id, ext: m[2] });
         }
         entries = out;
+        thumbWanted = imgs;
+        startThumbs();
+    }
 
-        // Decode thumbnails for the most recent image entries
-        if (imgs.length > 0 && !thumbs.running) {
-            thumbs.command = [
-                "sh", "-c",
-                'd=$1; shift; mkdir -p "$d"; for e in "$@"; do id=${e%%:*}; f="$d/$id.${e#*:}"; [ -s "$f" ] || cliphist decode "$id" > "$f"; done',
-                "sh", thumbDir
-            ].concat(imgs);
-            thumbs.running = true;
-        }
+    function startThumbs() {
+        if (thumbs.running) return;
+        const missing = thumbWanted.filter(t => !thumbReady[t.id]);
+        if (missing.length === 0) return;
+        thumbInflight = missing.map(t => t.id);
+        thumbs.command = [
+            "sh", "-c",
+            'd=$1; shift; mkdir -p "$d"; for e in "$@"; do id=${e%%:*}; f="$d/$id.${e#*:}"; [ -s "$f" ] || cliphist decode "$id" > "$f"; done',
+            "sh", thumbDir
+        ].concat(missing.map(t => t.id + ":" + t.ext));
+        thumbs.running = true;
     }
 
     // ── Processes ──────────────────────────────────────────
@@ -163,9 +172,15 @@ PanelWindow {
 
     Process {
         id: thumbs
-        onExited: root.thumbRev++
+        onExited: {
+            const r = Object.assign({}, root.thumbReady);
+            for (const id of root.thumbInflight) r[id] = true;
+            root.thumbReady = r;
+            root.thumbInflight = [];
+            root.startThumbs();
+        }
     }
-
+    
     Timer {
         id: confirmTimer
         interval: 3000
@@ -341,7 +356,7 @@ PanelWindow {
                                 asynchronous: true
                                 fillMode: Image.PreserveAspectCrop
                                 sourceSize: Qt.size(88, 88)
-                                source: (row.modelData.image && root.thumbRev > 0)
+                                source: (row.modelData.image && root.thumbReady[row.modelData.id])
                                         ? "file://" + root.thumbDir + "/" + row.modelData.id + "." + row.modelData.ext
                                         : ""
                             }
