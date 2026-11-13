@@ -1,6 +1,7 @@
 adwaita-qt6
 bibata-cursor-theme
 downgrade
+espanso-wayland
 lib32-nvidia-580xx-utils
 nvidia-580xx-dkms
 papirus-folders
