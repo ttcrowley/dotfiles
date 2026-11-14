@@ -13,6 +13,9 @@ PopupWindow {
     property bool open: false
     property int contentWidth: 260
     property int contentHeight: 256
+    // Height of the visible panel. Defaults to the window height; a popup can animate
+    // it (e.g. Pomodoro's task editor) without ever resizing the window itself.
+    property real panelHeight: contentHeight
     property int cornerRadius: 10
     // Inner breathing room between the panel edge and its content
     property int padding: 18
@@ -36,25 +39,41 @@ PopupWindow {
         }
     }
 
+    // Position is worked out once, when the popup opens, and then stays put. (It used to be
+    // a live binding, so the popup drifted whenever the bar button changed size, e.g. the
+    // Pomodoro time text appearing on play.)
+    property real placeX: 0
+    property real placeY: 0
+    property bool placed: false
+
+    function place() {
+        const w = barWindow?.width ?? 0
+        const h = barWindow?.height ?? 0
+        const pos = anchorItem.mapToItem(null, 0, 0)
+        if (BarState.vertical) {
+            // Flush against the bar's right edge, centered on the widget
+            placeX = w
+            const c = pos.y - (height - anchorItem.height) / 2
+            placeY = Math.max(4, Math.min(c, h - height - 4))
+        } else {
+            // Flush against the bar's bottom edge, centered under the widget
+            const c = pos.x - (width - anchorItem.width) / 2
+            placeX = Math.max(4, Math.min(c, w - width - 4))
+            placeY = h
+        }
+    }
+
+    onOpenChanged: {
+        if (open) { place(); placed = true }
+        else placed = false
+    }
+
     // Stay mapped until the slide-out finishes
-    visible: open || slide > 0.001
+    visible: (open && placed) || slide > 0.001
 
     anchor.window: popup.barWindow
-    // Flush against the bar (no gap) so it reads as part of it
-    anchor.rect.x: {
-        popup.open   // re-evaluate each time the popup opens
-        const w = popup.barWindow?.width ?? 0
-        if (BarState.vertical) return w
-        const centered = popup.anchorItem.mapToItem(null, 0, 0).x - (width - popup.anchorItem.width) / 2
-        return Math.max(4, Math.min(centered, w - width - 4))
-    }
-    anchor.rect.y: {
-        popup.open
-        const h = popup.barWindow?.height ?? 0
-        if (!BarState.vertical) return h
-        const centered = popup.anchorItem.mapToItem(null, 0, 0).y - (height - popup.anchorItem.height) / 2
-        return Math.max(4, Math.min(centered, h - height - 4))
-    }
+    anchor.rect.x: placeX
+    anchor.rect.y: placeY
 
     implicitWidth: contentWidth
     implicitHeight: contentHeight
@@ -63,7 +82,8 @@ PopupWindow {
     Rectangle {
         id: panel
         width: parent.width
-        height: parent.height
+        height: popup.panelHeight
+        clip: true
 
         // The window edge touching the bar is the "doorway": the panel starts
         // fully outside it and slides in, so it appears to come out of the bar.

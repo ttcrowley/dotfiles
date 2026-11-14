@@ -18,6 +18,96 @@ Singleton {
     property bool musicOn: true         // play the link during focus
     property int musicVolume: 60        // 0-100, mpv's own volume (on top of system volume)
 
+
+    // ── Tasks ───────────────────────────────────────────────
+    // [{ text: "...", target: 3, count: 0 }]  — done when count >= target
+    property var tasks: []
+    property int pickedTask: -1   // task the user clicked as current (-1 = automatic)
+
+    // Picked task if it's still open, otherwise the first unfinished one (-1 if none)
+    readonly property int currentTask: {
+        const p = pickedTask
+        if (p >= 0 && p < tasks.length && tasks[p].count < tasks[p].target) return p
+        return tasks.findIndex(t => t.count < t.target)
+    }
+    readonly property int tasksDone: tasks.filter(t => t.count >= t.target).length
+
+    readonly property string tasksPath:
+        (Quickshell.env("XDG_STATE_HOME") ?? (Quickshell.env("HOME") + "/.local/state"))
+        + "/quickshell-pomodoro-tasks.json"
+
+    function saveTasks() { taskFile.setText(JSON.stringify(tasks)) }
+
+    function addTask(text, target) {
+        const t = (text ?? "").trim()
+        if (t === "") return
+        tasks = tasks.concat([{ text: t, target: Math.max(1, target ?? 1), count: 0 }])
+        saveTasks()
+    }
+
+    function pickTask(i) { pickedTask = i }
+
+    function updateTask(i, text, target) {
+        const s = (text ?? "").trim()
+        if (s === "" || i < 0 || i >= tasks.length) return
+        const t = tasks.slice()
+        t[i] = { text: s, target: Math.max(1, Math.round(target)), count: t[i].count }
+        tasks = t
+        saveTasks()
+    }
+
+    // Checkbox: finish the task now, or reset it if it was already finished
+    function toggleTask(i) {
+        const t = tasks.slice()
+        const x = t[i]
+        t[i] = { text: x.text, target: x.target, count: x.count >= x.target ? 0 : x.target }
+        tasks = t
+        saveTasks()
+    }
+
+    function removeTask(i) {
+        const t = tasks.slice()
+        t.splice(i, 1)
+        pickedTask = -1
+        tasks = t
+        saveTasks()
+    }
+
+    function clearDoneTasks() {
+        pickedTask = -1
+        tasks = tasks.filter(t => t.count < t.target)
+        saveTasks()
+    }
+
+    // A finished focus session counts toward the current task; reaching its
+    // target checks it, and the next unfinished task becomes current.
+    function completeCurrentTask() {
+        const i = currentTask
+        if (i < 0) return
+        const t = tasks.slice()
+        t[i] = { text: t[i].text, target: t[i].target, count: t[i].count + 1 }
+        tasks = t
+        saveTasks()
+    }
+
+    FileView {
+        id: taskFile
+        path: root.tasksPath
+        printErrors: false
+        onLoaded: {
+            try {
+                const d = JSON.parse(text())
+                if (Array.isArray(d))
+                    root.tasks = d.map(t => ({
+                        text: t.text,
+                        target: t.target ?? 1,
+                        count: t.count ?? (t.done ? 1 : 0)
+                    }))
+            } catch (e) {}
+        }
+    }
+
+
     // ── Timer state ─────────────────────────────────────────
     property string phase: "focus"      // "focus" | "short" | "long"
     property bool running: false
@@ -105,8 +195,7 @@ Singleton {
 
     function advance(finished) {
         const wasFocus = phase === "focus"
-        if (wasFocus && finished) completed++
-
+        if (wasFocus && finished) { completed++; completeCurrentTask() }
         phase = wasFocus
             ? (finished && completed % cyclesBeforeLong === 0 ? "long" : "short")
             : "focus"

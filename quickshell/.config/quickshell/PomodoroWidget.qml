@@ -62,6 +62,7 @@ Item {
         barWindow: root.QsWindow.window
         contentWidth: 280
         contentHeight: pomodoro.implicitHeight + 2 * padding
+        panelHeight: pomodoro.shownHeight + 2 * padding
 
         Pomodoro {
             id: pomodoro

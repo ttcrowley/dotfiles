@@ -1,8 +1,10 @@
 import Quickshell
+import Quickshell.Wayland
 import QtQuick
 
 PanelWindow {
     id: bar
+    WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand   // lets popup text fields take keyboard focus
     required property var modelData
     screen: modelData
 
