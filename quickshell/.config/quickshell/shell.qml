@@ -7,9 +7,6 @@ ShellRoot {
         model: Quickshell.screens
         Bar {}
     }
-    
-    Dock {}
-    ClipboardMenu {}
 
     // Native notification daemon (replaces dunst).
     // DND is on only while a Pomodoro focus session is running.

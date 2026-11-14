@@ -7,7 +7,8 @@ import QtQuick.Layouts
 
 // Clipboard history menu backed by cliphist.
 //
-//   qs ipc call clipboard toggle | show | hide
+//   qs -p ~/.config/quickshell/dock ipc call clipboard toggle | show | hide
+// (the dock's Clipboard button in the utils state calls toggle() directly)
 //
 // Keys:  Up/Down move · Enter copy · Shift+Delete remove entry · Esc close
 // Mouse: click row = copy · x = remove entry · "Clear all" = wipe (asks twice)
@@ -70,6 +71,8 @@ PanelWindow {
         confirmWipe = false;
     }
 
+    function toggle() { open ? hide() : show() }
+
     function choose(i) {
         const e = filtered[i];
         if (!e) return;
@@ -90,8 +93,8 @@ PanelWindow {
             confirmTimer.restart();
             return;
         }
-	confirmWipe = false;
-	thumbReady = ({});
+        confirmWipe = false;
+        thumbReady = ({});
         thumbWanted = [];
         mutator.command = ["sh", "-c", 'cliphist wipe; rm -rf "$1"', "sh", thumbDir];
         mutator.running = true;
@@ -189,7 +192,7 @@ PanelWindow {
 
     IpcHandler {
         target: "clipboard"
-        function toggle(): void { root.open ? root.hide() : root.show() }
+        function toggle(): void { root.toggle() }
         function show(): void   { root.show() }
         function hide(): void   { root.hide() }
     }

@@ -28,8 +28,6 @@ hl.monitor({
 
 -- Set programs that you use
 local terminal    = "kitty"
-local menu        = "rofi -show drun"
-local calc        = "rofi -show calc -modi calc"
 local browser     = "flatpak run app.zen_browser.zen"
 local notes       = "obsidian"
 local games       = "steam"
@@ -56,6 +54,7 @@ hl.on("hyprland.start", function ()
    
 --Quicksheel
    hl.exec_cmd("qs")
+   hl.exec_cmd("qs -p ~/.config/quickshell/dock -d")
 
 --Espanso
 hl.exec_cmd("espanso daemon")
@@ -311,10 +310,6 @@ hl.bind(mainMod .. " + W", hl.dsp.window.float({ action = "toggle" }))
 --hl.bind(mainMod .. " + P", hl.dsp.window.pseudo())
 hl.bind(mainMod .. " + Alt_L", hl.dsp.layout("togglesplit"))    -- dwindle only
 
---rofi
-hl.bind(mainMod .. " + Q", hl.dsp.exec_cmd(menu))
-hl.bind(mainMod .. "+ SHIFT + Q", hl.dsp.exec_cmd(calc))
-
 --meus programas
 hl.bind(mainMod .. " + B", hl.dsp.exec_cmd(browser))
 hl.bind(mainMod .. " + O", hl.dsp.exec_cmd(notes))
@@ -325,17 +320,15 @@ hl.bind(mainMod .. " + G", hl.dsp.exec_cmd(games))
 hl.bind(mainMod .. " + PRINT", hl.dsp.exec_cmd("hyprshot -m region"))
 hl.bind(mainMod .. " + SHIFT + PRINT", hl.dsp.exec_cmd("hyprshot -m window"))
 
-hl.bind("+ PRINT", hl.dsp.exec_cmd('rofi -show shot -modi "shot:~/.config/rofi/scripts/shot.sh" -theme ~/.config/rofi/shot.rasi'))
-
 -- maximixar - fullscreen
 hl.bind(mainMod .. "+ SPACE", hl.dsp.window.fullscreen({mode = "maximized", action = "toggle"}))
 hl.bind(mainMod .. "+ SHIFT + SPACE", hl.dsp.window.fullscreen({mode = "fullscreen", action = "toggle"}))
 
 --cliphist
-hl.bind(mainMod .. " + V", hl.dsp.exec_cmd("qs ipc call clipboard toggle"))
+hl.bind(mainMod .. " + V", hl.dsp.exec_cmd("qs -p /home/crowley/.config/quickshell/dock ipc call clipboard toggle"))
 
--- Dock
-hl.bind(mainMod .."+ d", hl.dsp.exec_cmd("qs ipc call dock toggle"))
+--dock
+hl.bind(mainMod .. "+ d", hl.dsp.exec_cmd("qs -p /home/crowley/.config/quickshell/dock ipc call dock toggle"))
 
 -- HorizontalxVertical Bar
 hl.bind(mainMod .. "+ h", hl.dsp.exec_cmd("qs ipc call bar toggle"))
@@ -430,13 +423,6 @@ hl.window_rule({
     },
 
     no_focus = true,
-})
-
---rofi
-hl.layer_rule({
-  match = { namespace = "rofi" },
-  blur = true,
-  ignore_alpha = 0.8,
 })
 
 --nvim

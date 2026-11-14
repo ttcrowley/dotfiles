@@ -92,7 +92,7 @@ Item {
             if (ev.button === Qt.RightButton)
                 root.menuRequested();
             else if (ev.button === Qt.MiddleButton)
-                DockState.launch(root.item);
+                DockState.closeWindow(root.item);
             else
                 DockState.activate(root.item);
         }

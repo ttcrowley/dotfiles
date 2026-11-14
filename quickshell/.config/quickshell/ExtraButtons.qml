@@ -65,13 +65,12 @@ Item {
 
             Grid {
                 id: content
-                columns: root.vertical ? 1 : 3
+                columns: root.vertical ? 1 : 2
                 spacing: root.gap
                 horizontalItemAlignment: Grid.AlignHCenter
                 verticalItemAlignment: Grid.AlignVCenter
 
                 NotificationBell {}
-                ClipboardButton {}
                 ConfigMenu { id: configMenu }
             }
         }
