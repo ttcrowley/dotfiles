@@ -20,10 +20,9 @@ Item {
     // setsid keeps it alive after Quickshell kills itself. If you start the shell
     // with extra flags (-c name, -p path), put them on the `qs -d` part.
     property var restartCommand: [
-        "setsid", "-f", "sh", "-c",
-        "pkill -x qs; pkill -x quickshell; sleep 0.5; exec qs -d"
-    ]
-
+    "setsid", "-f", "sh", "-c",
+    "pkill -x qs; pkill -x quickshell; sleep 0.5; qs -d; qs -p ~/.config/quickshell/dock -d"
+]
     readonly property bool vertical: BarState.vertical
 
     // Horizontal bar: menu hangs under the bar, right-aligned.

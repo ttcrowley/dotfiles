@@ -85,7 +85,8 @@ Scope {
             property var menuItem: null
             property real menuCenterX: 0
             readonly property bool launcherOpen: mode === 1
-            readonly property bool revealed: !root.autoHide || shown || root.forced || launcherOpen
+            readonly property bool utilsOpen: mode === 2
+            readonly property bool revealed: !root.autoHide || shown || root.forced || launcherOpen || utilsOpen
 
             function setMode(m) {
                 const n = Math.max(0, Math.min(2, m));
@@ -166,6 +167,10 @@ Scope {
                     id: hideTimer
                     interval: root.hideDelay
                     onTriggered: {
+                        if (favs.dragKey !== "") {   // never hide mid-drag
+                            hideTimer.restart();
+                            return;
+                        }
                         win.shown = false;
                         win.menuOpen = false;
                         win.mode = 0;          // always come back as favorites
@@ -227,28 +232,19 @@ Scope {
                                 id: favPage
                                 index: 0
                                 mode: win.mode
-                                implicitWidth: Math.max(favRow.implicitWidth, 170)
+                                implicitWidth: Math.max(favs.targetWidth, 170)
 
-                                Row {
-                                    id: favRow
+                                DockFavorites {
+                                    id: favs
                                     anchors.centerIn: parent
-                                    spacing: 8
+                                    iconSize: root.iconSize
+                                    tipsEnabled: !win.menuOpen && win.mode === 0
+                                    interactive: win.mode === 0
 
-                                    Repeater {
-                                        model: DockState.items
-
-                                        DockItem {
-                                            required property var modelData
-                                            item: modelData
-                                            iconSize: root.iconSize
-                                            tipEnabled: !win.menuOpen && win.mode === 0
-
-                                            onMenuRequested: {
-                                                win.menuItem = modelData;
-                                                win.menuCenterX = mapToItem(null, width / 2, 0).x;
-                                                win.menuOpen = true;
-                                            }
-                                        }
+                                    onMenuRequested: (item, centerX) => {
+                                        win.menuItem = item;
+                                        win.menuCenterX = centerX;
+                                        win.menuOpen = true;
                                     }
                                 }
 

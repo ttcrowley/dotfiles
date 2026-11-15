@@ -18,6 +18,15 @@ Singleton {
         DesktopEntries.applications.values
     )
 
+    // key -> item, so the dock can keep one stable delegate per app
+    readonly property var itemMap: buildMap(items)
+
+    function buildMap(list) {
+        const m = {};
+        for (const it of Array.from(list)) m[it.key] = it;
+        return m;
+    }
+
     FileView {
         id: file
         path: Quickshell.env("HOME") + "/.config/quickshell/dock/dock-favorites.json"
@@ -79,9 +88,53 @@ Singleton {
         return (s ?? "").toString().toLowerCase().replace(/\.desktop$/, "");
     }
 
+    function squash(s) {
+        return (s ?? "").toString().toLowerCase().replace(/[^a-z0-9]/g, "");
+    }
+
+    function iconBase(e) {
+        return (e.icon ?? "").toString().split("/").pop().replace(/\.[a-z]+$/i, "");
+    }
+
+    // Steam games open a window whose appId is "steam_app_<number>", which matches no
+    // .desktop file. The numbers a launcher entry can be known by:
+    //  - the id in "steam steam://rungameid/<id>", or in the icon "steam_icon_<id>"
+    //  - for non-Steam shortcuts (a huge 64-bit id) the 32-bit app id inside it,
+    //    which is the one Steam puts in the window's class
+    function steamIdsOfEntry(e) {
+        const ids = [];
+        const exec = (e.execString ?? "").toString();
+        const icon = (e.icon ?? "").toString();
+        const m = /rungameid\/(\d+)/.exec(exec) ?? /steam_icon_(\d+)/.exec(icon);
+        if (!m) return ids;
+        ids.push(m[1]);
+        const n = Number(m[1]);
+        if (n >= 4294967296) ids.push(String(Math.floor(n / 4294967296)));
+        return ids;
+    }
+
+    function steamEntry(appId) {
+        const m = /^steam_app_(\d+)$/.exec((appId ?? "").toString().toLowerCase());
+        if (!m) return null;
+        for (const e of Array.from(DesktopEntries.applications.values))
+            if (steamIdsOfEntry(e).indexOf(m[1]) !== -1) return e;
+        return null;
+    }
+
+    // last resort: the window's appId is the app's name or icon name with the spaces
+    // squeezed out ("SlayTheSpire2" for "Slay the Spire 2")
+    function nameEntry(appId) {
+        const q = squash(appId);
+        if (q === "") return null;
+        for (const e of Array.from(DesktopEntries.applications.values))
+            if (squash(e.name) === q || squash(e.id) === q || squash(iconBase(e)) === q) return e;
+        return null;
+    }
+
     function entryFor(id) {
         if (!id) return null;
-        const e = DesktopEntries.byId(id) ?? DesktopEntries.heuristicLookup(id) ?? null;
+        const e = DesktopEntries.byId(id) ?? DesktopEntries.heuristicLookup(id)
+                  ?? steamEntry(id) ?? nameEntry(id) ?? null;
         return (e && isInstalled(e)) ? e : null;
     }
 
@@ -101,7 +154,8 @@ Singleton {
             const entry = entryFor(fav);
             if (!entry) continue;
 
-            const keys = [fav, entry.id, entry.startupClass, entry.name]
+            const keys = [fav, entry.id, entry.startupClass, entry.name, iconBase(entry)]
+                .concat(steamIdsOfEntry(entry).map(i => "steam_app_" + i))
                 .map(norm)
                 .filter(k => k !== "");
 
@@ -112,7 +166,7 @@ Singleton {
                     claimed[k] = true;
                 }
             }
-            out.push({ id: fav, entry: entry, name: entry.name, icon: entry.icon, windows: wins, pinned: true });
+            out.push({ key: "p:" + norm(fav), id: fav, entry: entry, name: entry.name, icon: entry.icon, windows: wins, pinned: true });
         }
 
         for (const k of Object.keys(groups)) {
@@ -120,6 +174,7 @@ Singleton {
             const wins = groups[k];
             const entry = entryFor(wins[0].appId);
             out.push({
+                key: "r:" + k,
                 id: entry ? entry.id : "",
                 entry: entry,
                 name: entry ? entry.name : wins[0].appId,
@@ -139,6 +194,17 @@ Singleton {
             f.push(id);
             store.favorites = f;
         }
+    }
+
+    // Drag-and-drop reorder: put `id` where `targetId` currently is.
+    function moveFavorite(id, targetId) {
+        const f = Array.from(store.favorites);
+        const from = f.indexOf(id);
+        const to = f.indexOf(targetId);
+        if (from < 0 || to < 0 || from === to) return;
+        f.splice(from, 1);
+        f.splice(to, 0, id);
+        store.favorites = f;
     }
 
     function unpin(id) {

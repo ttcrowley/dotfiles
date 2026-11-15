@@ -317,8 +317,7 @@ hl.bind(mainMod .. " + G", hl.dsp.exec_cmd(games))
 
 -- hyprshot
 --hl.bind(" + PRINT", hl.dsp.exec_cmd("hyprshot -m output"))
-hl.bind(mainMod .. " + PRINT", hl.dsp.exec_cmd("hyprshot -m region"))
-hl.bind(mainMod .. " + SHIFT + PRINT", hl.dsp.exec_cmd("hyprshot -m window"))
+hl.bind(" + PRINT", hl.dsp.exec_cmd("qs -p /home/crowley/.config/quickshell/dock ipc call dock utils"))
 
 -- maximixar - fullscreen
 hl.bind(mainMod .. "+ SPACE", hl.dsp.window.fullscreen({mode = "maximized", action = "toggle"}))
@@ -485,6 +484,14 @@ hl.window_rule({
     match = { fullscreen = true },
 
     border_size = 0,
+})
+
+
+--slay the spire (temp)
+hl.window_rule({
+	name = "Slay the Spire",
+	match = {class = "steam_app_2252283979",},
+	workspace = "special:magic",
 })
 
 -- WORKSPACES RULES HERE
