@@ -12,7 +12,9 @@ Item {
     id: root
 
     property int iconSize: 40
-    property int spacing: 8
+    // Was 8. Must be >= (iconSize + 14) * magnify - iconSize - 14
+    // so a fully-magnified tile still fits in its slot without touching its neighbours.
+    property int spacing: 16
     property bool tipsEnabled: true
     property bool interactive: true          // false while another dock state is showing
 
