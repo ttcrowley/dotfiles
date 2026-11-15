@@ -192,7 +192,7 @@ Scope {
                 Rectangle {
                     id: dock
                     width: row.implicitWidth + 56
-                    height: root.iconSize + 56
+                    height: root.iconSize + 40
                     x: (parent.width - width) / 2
                     y: win.revealed ? parent.height - height - root.bottomMargin : parent.height + 6
                     radius: 14
@@ -215,7 +215,7 @@ Scope {
                     Row {
                         id: row
                         anchors.horizontalCenter: parent.horizontalCenter
-                        y: 14
+                        y: 4
                         spacing: 0
 
                         // The dock's width follows whichever state is showing
