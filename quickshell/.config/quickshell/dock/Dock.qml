@@ -15,7 +15,7 @@ Scope {
     property int bottomMargin: 24      // gap between the dock and the screen edge
     property int triggerWidth: 520     // width of the hover strip at the screen bottom
     property bool forced: false        // keep the dock open until toggled again
-    property int searchWidth: 280      // width of the search bar (search state)
+    property int searchWidth: 400      // width of the search bar (state 1); popup uses this too
     property int maxResults: 7         // visible rows in the results list
     property int resultHeight: 44
     property int wheelCooldown: 300    // ms between wheel-driven state changes
@@ -354,10 +354,13 @@ Scope {
 
                                         DockButton {
                                             required property var modelData
+                                            required property int index
                                             iconSize: root.iconSize
                                             glyph: modelData.glyph
                                             tip: modelData.tip
                                             tipEnabled: win.mode === 2
+                                            revealed: win.mode === 2
+                                            revealDelay: index * 45
                                             onClicked: {
                                                 root.runShot(modelData.mode);
                                                 win.mode = 0;
@@ -366,16 +369,34 @@ Scope {
                                         }
                                     }
 
+                                    // Divider — grows from the middle as part of the cascade
                                     Item {
+                                        id: dividerSlot
                                         width: 9
                                         height: root.iconSize + 20
 
+                                        property bool _shown: false
+                                        readonly property bool shown: win.mode === 2
+                                        onShownChanged: {
+                                            if (shown) dividerTimer.restart();
+                                            else { dividerTimer.stop(); _shown = false; }
+                                        }
+
+                                        Timer {
+                                            id: dividerTimer
+                                            interval: 135   // 3 shots × 45 ms
+                                            onTriggered: dividerSlot._shown = dividerSlot.shown
+                                        }
+
                                         Rectangle {
                                             anchors.horizontalCenter: parent.horizontalCenter
-                                            y: 6 + root.iconSize * 0.2
+                                            anchors.verticalCenter: parent.verticalCenter
                                             width: 1
-                                            height: root.iconSize * 0.6
+                                            height: (root.iconSize * 0.6) * (dividerSlot._shown ? 1 : 0)
                                             color: Theme.border
+                                            opacity: dividerSlot._shown ? 1 : 0
+                                            Behavior on height { NumberAnimation { duration: 240; easing.type: Easing.OutCubic } }
+                                            Behavior on opacity { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
                                         }
                                     }
 
@@ -384,10 +405,13 @@ Scope {
 
                                         DockButton {
                                             required property var modelData
+                                            required property int index
                                             iconSize: root.iconSize
                                             glyph: modelData.glyph
                                             tip: modelData.tip
                                             tipEnabled: win.mode === 2
+                                            revealed: win.mode === 2
+                                            revealDelay: (4 + index) * 45   // after the divider
                                             onClicked: {
                                                 root.runUtil(modelData);
                                                 win.mode = 0;
@@ -535,6 +559,7 @@ Scope {
                     border.color: Theme.border
 
                     Behavior on opacity { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
+                    Behavior on height  { NumberAnimation { duration: 160; easing.type: Easing.OutCubic } }
 
                     transform: Translate {
                         y: win.launcherOpen ? 0 : 12
@@ -557,12 +582,19 @@ Scope {
                         clip: true
                         spacing: 2
                         boundsBehavior: Flickable.StopAtBounds
-                        highlightFollowsCurrentItem: false
+                        highlightFollowsCurrentItem: true
+                        highlightMoveDuration: 140
+                        highlight: Rectangle {
+                            width: list.width
+                            height: root.resultHeight
+                            radius: 8
+                            color: Theme.surface
+                        }
                         model: ScriptModel { values: popup.results }
 
                         onCurrentIndexChanged: positionViewAtIndex(currentIndex, ListView.Contain)
 
-                        delegate: Item {
+                       delegate: Item {
                             id: appRow
                             required property var modelData
                             required property int index
@@ -573,13 +605,7 @@ Scope {
                             width: list.width
                             height: root.resultHeight
 
-                            Rectangle {
-                                anchors.fill: parent
-                                radius: 8
-                                color: appRow.current ? Theme.surface : "transparent"
-                                Behavior on color { ColorAnimation { duration: 100 } }
-                            }
-
+                            // Full-row hit area stays put — it must not move with the nudge.
                             MouseArea {
                                 anchors.fill: parent
                                 hoverEnabled: true
@@ -590,66 +616,83 @@ Scope {
                                 }
                             }
 
-                            IconImage {
-                                id: appIcon
-                                x: 10
-                                anchors.verticalCenter: parent.verticalCenter
-                                implicitSize: 28
-                                source: {
-                                    const n = appRow.modelData.icon;
-                                    if (!n) return Quickshell.iconPath("application-x-executable");
-                                    if (n.startsWith("/")) return "file://" + n;
-                                    return Quickshell.iconPath(n, "application-x-executable");
-                                }
-                            }
+                            // Visual content. Width/height set explicitly (NOT anchors.fill)
+                            // so `x` can animate — anchors.fill would pin x and kill the nudge.
+                            Item {
+                                id: content
+                                width: parent.width
+                                height: parent.height
+                                x: appRow.current ? 6 : 0
+                                Behavior on x { NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
 
-                            Column {
-                                anchors {
-                                    left: appIcon.right
-                                    leftMargin: 12
-                                    right: star.left
-                                    rightMargin: 8
-                                    verticalCenter: parent.verticalCenter
+                                IconImage {
+                                    id: appIcon
+                                    x: 10
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    implicitSize: 28
+                                    scale: appRow.current ? 1.18 : 1.0
+                                    Behavior on scale { NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
+                                    source: {
+                                        const n = appRow.modelData.icon;
+                                        if (!n) return Quickshell.iconPath("application-x-executable");
+                                        if (n.startsWith("/")) return "file://" + n;
+                                        return Quickshell.iconPath(n, "application-x-executable");
+                                    }
                                 }
 
+                                Column {
+                                    anchors {
+                                        left: appIcon.right
+                                        leftMargin: 12
+                                        right: star.left
+                                        rightMargin: 8
+                                        verticalCenter: parent.verticalCenter
+                                    }
+
+                                    Text {
+                                        width: parent.width
+                                        text: appRow.modelData.name
+                                        elide: Text.ElideRight
+                                        color: appRow.current ? Theme.fg : Theme.muted
+                                        Behavior on color { ColorAnimation { duration: 140 } }
+                                        font.family: Theme.font
+                                        font.pixelSize: Theme.fontSize
+                                    }
+                                    Text {
+                                        visible: appRow.subtitle !== ""
+                                        width: parent.width
+                                        text: appRow.subtitle
+                                        elide: Text.ElideRight
+                                        color: Theme.dim
+                                        font.family: Theme.font
+                                        font.pixelSize: Theme.fontSize - 3
+                                    }
+                                }
+
+                                // pin / unpin from the dock
                                 Text {
-                                    width: parent.width
-                                    text: appRow.modelData.name
-                                    elide: Text.ElideRight
-                                    color: Theme.fg
-                                    font.family: Theme.font
-                                    font.pixelSize: Theme.fontSize
-                                }
-                                Text {
-                                    visible: appRow.subtitle !== ""
-                                    width: parent.width
-                                    text: appRow.subtitle
-                                    elide: Text.ElideRight
-                                    color: Theme.dim
-                                    font.family: Theme.font
-                                    font.pixelSize: Theme.fontSize - 3
-                                }
-                            }
+                                    id: star
+                                    visible: opacity > 0.01
+                                    opacity: (appRow.pinned || appRow.current) ? 1 : 0
+                                    Behavior on opacity { NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
 
-                            // pin / unpin from the dock
-                            Text {
-                                id: star
-                                visible: appRow.pinned || appRow.current
-                                anchors {
-                                    right: parent.right
-                                    rightMargin: 14
-                                    verticalCenter: parent.verticalCenter
-                                }
-                                text: appRow.pinned ? "★" : "☆"
-                                color: appRow.pinned ? Theme.muted : Theme.dim
-                                font.pixelSize: 18
+                                    anchors {
+                                        right: parent.right
+                                        rightMargin: 14
+                                        verticalCenter: parent.verticalCenter
+                                    }
+                                    text: appRow.pinned ? "★" : "☆"
+                                    color: appRow.pinned ? Theme.muted : Theme.dim
+                                    font.pixelSize: 18
 
-                                MouseArea {
-                                    anchors.fill: parent
-                                    anchors.margins: -8
-                                    onClicked: appRow.pinned
-                                        ? DockState.unpin(appRow.modelData.id)
-                                        : DockState.pin(appRow.modelData.id)
+                                    MouseArea {
+                                        anchors.fill: parent
+                                        anchors.margins: -8
+                                        enabled: appRow.pinned || appRow.current
+                                        onClicked: appRow.pinned
+                                            ? DockState.unpin(appRow.modelData.id)
+                                            : DockState.pin(appRow.modelData.id)
+                                    }
                                 }
                             }
                         }

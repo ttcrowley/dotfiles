@@ -370,20 +370,12 @@ command: ["sh", "-c",
                             }
                             spacing: 10
 
-                            Image {
-                                readonly property string src: entry.modelData.image !== ""
-                                    ? entry.modelData.image
-                                    : (entry.modelData.appIcon !== ""
-                                        ? Quickshell.iconPath(entry.modelData.appIcon, true)
-                                        : "")
-                                visible: src !== ""
-                                source: src
+                            NotifIcon {
+                                notif: entry.modelData
+                                size: 40
                                 Layout.preferredWidth: 40
                                 Layout.preferredHeight: 40
                                 Layout.alignment: Qt.AlignTop
-                                sourceSize: Qt.size(80, 80)
-                                fillMode: Image.PreserveAspectFit
-                                asynchronous: true
                             }
 
                             ColumnLayout {
@@ -648,20 +640,12 @@ command: ["sh", "-c",
                                     }
                                     spacing: 8
 
-                                    Image {
-                                        readonly property string src: row.modelData.image !== ""
-                                            ? row.modelData.image
-                                            : (row.modelData.appIcon !== ""
-                                                ? Quickshell.iconPath(row.modelData.appIcon, true)
-                                                : "")
-                                        visible: src !== ""
-                                        source: src
+                                    NotifIcon {
+                                        notif: row.modelData
+                                        size: 32
                                         Layout.preferredWidth: 32
                                         Layout.preferredHeight: 32
                                         Layout.alignment: Qt.AlignTop
-                                        sourceSize: Qt.size(64, 64)
-                                        fillMode: Image.PreserveAspectFit
-                                        asynchronous: true
                                     }
 
                                     ColumnLayout {
