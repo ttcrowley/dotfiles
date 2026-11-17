@@ -23,13 +23,13 @@ Item {
         anchors.centerIn: parent
         horizontalAlignment: Text.AlignHCenter
         text: BarState.vertical
-            ? clock.date.toLocaleString(Qt.locale("pt_BR"), "HH") + "\n" + clock.date.toLocaleString(Qt.locale("pt_BR"), "mm")
-            : clock.date.toLocaleString(Qt.locale("pt_BR"), "HH:mm")
+            ? clock.date.toLocaleString(Theme.locale, "HH") + "\n" + clock.date.toLocaleString(Theme.locale, "mm")
+            : clock.date.toLocaleString(Theme.locale, "HH:mm")
         color: Theme.muted
         font { family: Theme.font; pixelSize: Theme.fontSize + 2; bold: true }
 
         opacity: hover.hovered ? 0 : 1
-        Behavior on opacity { NumberAnimation { duration: 150 } }
+        Behavior on opacity { NumberAnimation { duration: Theme.animFast } }
     }
 
     // Date (on hover)
@@ -38,13 +38,13 @@ Item {
         anchors.centerIn: parent
         horizontalAlignment: Text.AlignHCenter
         text: BarState.vertical
-            ? (clock.date.toLocaleString(Qt.locale("pt_BR"), "dd") + "\n" + clock.date.toLocaleString(Qt.locale("pt_BR"), "MMM")).replace(/\./g, "")
-            : clock.date.toLocaleString(Qt.locale("pt_BR"), "ddd, d 'de' MMMM").replace(/\./g, "")
+            ? (clock.date.toLocaleString(Theme.locale, "dd") + "\n" + clock.date.toLocaleString(Theme.locale, "MMM")).replace(/\./g, "")
+            : clock.date.toLocaleString(Theme.locale, "ddd, d 'de' MMMM").replace(/\./g, "")
         color: Theme.dim
         font { family: Theme.font; pixelSize: Theme.fontSize; bold: true }
 
         opacity: hover.hovered ? 1 : 0
-        Behavior on opacity { NumberAnimation { duration: 150 } }
+        Behavior on opacity { NumberAnimation { duration: Theme.animFast } }
     }
 
     MouseArea {
@@ -85,7 +85,7 @@ Item {
                         onClicked: popup.shown = new Date(popup.shown.getFullYear(), popup.shown.getMonth() - 1, 1) }
                 }
                 Text {
-                    text: popup.shown.toLocaleDateString(Qt.locale("pt_BR"), "MMMM 'de' yyyy")
+                    text: popup.shown.toLocaleDateString(Theme.locale, "MMMM 'de' yyyy")
                     color: Theme.fg; horizontalAlignment: Text.AlignHCenter
                     width: parent.width - 60
                     font { family: Theme.font; pixelSize: Theme.fontSize; bold: true }
@@ -101,7 +101,7 @@ Item {
 
             DayOfWeekRow {
                 width: parent.width
-                locale: Qt.locale("pt_BR")
+                locale: Theme.locale
                 delegate: Text {
                     required property var model
                     text: model.shortName
@@ -116,7 +116,7 @@ Item {
                 spacing: 2
                 month: popup.shown.getMonth()
                 year: popup.shown.getFullYear()
-                locale: Qt.locale("pt_BR")
+                locale: Theme.locale
                 delegate: Item {
                     id: cell
                     required property var model

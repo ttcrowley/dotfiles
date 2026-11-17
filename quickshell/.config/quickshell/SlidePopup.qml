@@ -16,7 +16,7 @@ PopupWindow {
     // Height of the visible panel. Defaults to the window height; a popup can animate
     // it (e.g. Pomodoro's task editor) without ever resizing the window itself.
     property real panelHeight: contentHeight
-    property int cornerRadius: 10
+    property int cornerRadius: Theme.radius
     // Inner breathing room between the panel edge and its content
     property int padding: 18
     property int openDuration: 380

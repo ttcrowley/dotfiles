@@ -25,24 +25,28 @@ Grid {
     HoverHandler { id: hover }
 
     // Scroll anywhere on the widget to change volume
-   WheelHandler {
-    acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
-    onWheel: event => {
-        console.log("volume wheel", event.angleDelta.y, root.sink?.audio ? "audio ok" : "no audio")
-        const step = 0.05
-        root.setVol(root.vol + (event.angleDelta.y > 0 ? step : -step))
+    WheelHandler {
+        acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
+        onWheel: event => {
+            const step = 0.05
+            root.setVol(root.vol + (event.angleDelta.y > 0 ? step : -step))
+        }
     }
-}
 
     // Icon: left click = mute, right click = pavucontrol
     Text {
         id: icon
         text: root.muted ? "\uf026" : root.vol < 0.5 ? "\uf027" : "\uf028"
-	color: root.muted ? Theme.dim : Theme.dim
-	font { family: Theme.font; pixelSize: Theme.fontSize }
+        color: root.muted ? Theme.warn
+             : iconArea.containsMouse ? Theme.fg
+             : Theme.dim
+        Behavior on color { ColorAnimation { duration: Theme.animFast } }
+        font { family: Theme.font; pixelSize: Theme.fontSize }
 
         MouseArea {
+            id: iconArea
             anchors.fill: parent
+            hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
             acceptedButtons: Qt.LeftButton | Qt.RightButton
             onClicked: mouse => {
@@ -61,9 +65,9 @@ Grid {
         height: BarState.vertical ? (root.open ? content.implicitHeight : 0) : icon.implicitHeight
         opacity: root.open ? 1 : 0
 
-        Behavior on width { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
-        Behavior on height { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
-        Behavior on opacity { NumberAnimation { duration: 150 } }
+        Behavior on width { NumberAnimation { duration: Theme.animFast; easing.type: Easing.OutCubic } }
+        Behavior on height { NumberAnimation { duration: Theme.animFast; easing.type: Easing.OutCubic } }
+        Behavior on opacity { NumberAnimation { duration: Theme.animFast } }
 
         Row {
             id: content

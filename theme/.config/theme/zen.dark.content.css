@@ -1,0 +1,18 @@
+/* ~/.config/theme/zen.dark.content.css
+ *
+ * Dark template for Zen's userContent.css (affects WEBSITES, not the browser UI).
+ * Keep it narrow: a global override will fight with every site that has its
+ * own dark/light theme. Use @-moz-document to limit which sites it touches.
+ */
+
+/* 1. Dark scrollbars and form controls on every page. */
+:root {
+  color-scheme: dark;
+}
+
+/* 2. Per-site overrides: add as needed, one block per domain. */
+@-moz-document domain("news.ycombinator.com") {
+  html, body { background: #0C0C0C !important; }
+  body, td, .title, .comment { color: #DFDFDF !important; }
+  a { color: #C2B67E !important; }
+}

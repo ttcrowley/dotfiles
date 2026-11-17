@@ -22,7 +22,20 @@ Item {
     // spacing, to push it away from the workspaces toward the bar's center.
     readonly property real gapBefore: vertical ? 28 : 0
 
-    visible: label.text !== ""
+    // Text that is currently displayed; trails `targetText` by one short fade
+    readonly property string targetText: title !== "" ? title : appId
+    property string shownText: ""
+    onTargetTextChanged: swap.restart()
+    Component.onCompleted: shownText = targetText
+
+    SequentialAnimation {
+        id: swap
+        NumberAnimation { target: label; property: "opacity"; to: 0; duration: 90 }
+        ScriptAction { script: root.shownText = root.targetText }
+        NumberAnimation { target: label; property: "opacity"; to: 1; duration: 140 }
+    }
+
+    visible: shownText !== ""
 
     // The rotated text occupies swapped width/height in the layout
     implicitWidth: vertical ? label.height : label.width
@@ -33,8 +46,7 @@ Item {
     Text {
         id: label
 
-        // Show the window title; fall back to the app id if the title is empty
-        text: root.title !== "" ? root.title : root.appId
+        text: root.shownText
 
         width: Math.min(implicitWidth, root.maxLength)
         elide: Text.ElideRight

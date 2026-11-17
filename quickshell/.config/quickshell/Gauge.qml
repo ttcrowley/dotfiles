@@ -1,7 +1,9 @@
 import Quickshell
 import QtQuick
+import QtQuick.Shapes
 
-// Circular gauge: grey track (unused) + colored arc (used), 0-100
+// Circular gauge: grey track (unused) + colored arc (used), 0-100.
+// The arc glides to new values instead of jumping.
 Item {
     id: g
 
@@ -14,42 +16,53 @@ Item {
     readonly property real ratio: Math.max(0, Math.min(100, value)) / 100
 
     property int size: 20
-    property int thickness: 2 
+    property int thickness: 2
+
+    // What is actually drawn: eases toward `ratio` / `fillColor`
+    property real shownRatio: ratio
+    property color shownColor: fillColor
+    Behavior on shownRatio { NumberAnimation { duration: 400; easing.type: Easing.OutCubic } }
+    Behavior on shownColor { ColorAnimation { duration: 300 } }
 
     implicitWidth: size
     implicitHeight: size
 
-    onRatioChanged: canvas.requestPaint()
-    onFillColorChanged: canvas.requestPaint()
-
-    Canvas {
-        id: canvas
+    Shape {
         anchors.fill: parent
+        antialiasing: true
+        preferredRendererType: Shape.CurveRenderer   // Qt 6.6+; delete this line if it errors
 
-        onPaint: {
-            var ctx = getContext("2d")
-            ctx.clearRect(0, 0, width, height)
+        // unused (grey)
+        ShapePath {
+            strokeColor: Theme.border
+            strokeWidth: g.thickness
+            fillColor: "transparent"
+            capStyle: ShapePath.FlatCap
 
-            var lw = g.thickness
-            var r = (width - lw) / 2
-            var cx = width / 2
-            var cy = height / 2
-            var start = -Math.PI / 2
+            PathAngleArc {
+                centerX: g.size / 2
+                centerY: g.size / 2
+                radiusX: (g.size - g.thickness) / 2
+                radiusY: radiusX
+                startAngle: -90
+                sweepAngle: 360
+            }
+        }
 
-            ctx.lineWidth = lw
+        // used (theme color)
+        ShapePath {
+            strokeColor: g.shownRatio > 0.001 ? g.shownColor : "transparent"
+            strokeWidth: g.thickness
+            fillColor: "transparent"
+            capStyle: ShapePath.FlatCap
 
-            // unused (grey)
-            ctx.strokeStyle = Theme.border
-            ctx.beginPath()
-            ctx.arc(cx, cy, r, 0, Math.PI * 2, false)
-            ctx.stroke()
-
-            // used (theme color)
-            if (g.ratio > 0) {
-                ctx.strokeStyle = g.fillColor
-                ctx.beginPath()
-                ctx.arc(cx, cy, r, start, start + Math.PI * 2 * g.ratio, false)
-                ctx.stroke()
+            PathAngleArc {
+                centerX: g.size / 2
+                centerY: g.size / 2
+                radiusX: (g.size - g.thickness) / 2
+                radiusY: radiusX
+                startAngle: -90
+                sweepAngle: 360 * g.shownRatio
             }
         }
     }
@@ -71,7 +84,8 @@ Item {
     }
 
     PopupWindow {
-        visible: area.containsMouse
+        // Stay mapped until the fade-out has finished
+        visible: area.containsMouse || tipBox.opacity > 0.01
         anchor.window: g.QsWindow.window
         // Below the gauge (horizontal bar) / to its right (vertical bar)
         anchor.edges: BarState.vertical ? Edges.Right : Edges.Bottom
@@ -94,11 +108,15 @@ Item {
         color: "transparent"
 
         Rectangle {
+            id: tipBox
             anchors.fill: parent
             color: Theme.surface
             border.color: Theme.border
             border.width: 1
-            radius: 6
+            radius: Theme.radiusSmall
+
+            opacity: area.containsMouse ? 1 : 0
+            Behavior on opacity { NumberAnimation { duration: Theme.animFast } }
 
             Text {
                 id: tip

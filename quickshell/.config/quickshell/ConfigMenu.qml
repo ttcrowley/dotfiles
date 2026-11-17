@@ -4,6 +4,7 @@ import QtQuick
 
 // Gear button with a tray, same layout as PowerMenu:
 //   Vertical/Horizontal bar  switch the bar orientation (was OrientationButton)
+//   Light/Dark theme         flip Theme.dark (bar and dock follow)
 //   Restart shell            kill every Quickshell instance and start a fresh one
 //   Open config              Yazi (in kitty) on the Quickshell config folder
 Item {
@@ -41,8 +42,8 @@ Item {
         font { family: Theme.font; pixelSize: Theme.fontSize + 2 }
         // the gear turns a little when the menu opens
         rotation: root.open ? 60 : 0
-        Behavior on rotation { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
-        Behavior on color { ColorAnimation { duration: 150 } }
+        Behavior on rotation { NumberAnimation { duration: Theme.animMed; easing.type: Easing.OutCubic } }
+        Behavior on color { ColorAnimation { duration: Theme.animFast } }
     }
 
     MouseArea {
@@ -64,7 +65,7 @@ Item {
 
         width: parent.width
         height: 32
-        radius: 6
+        radius: Theme.radiusSmall
         color: area.containsMouse ? Theme.border : "transparent"
 
         Row {
@@ -129,7 +130,7 @@ Item {
             y: root.vertical ? parent.height - height - root.menuBottom : root.menuTop
             width: 190
             height: menu.implicitHeight + 16
-            radius: 10
+            radius: Theme.radius
             color: Theme.surface
             border { color: Theme.border; width: 1 }
 
@@ -148,6 +149,12 @@ Item {
                     glyph: BarState.vertical ? "\uf07e" : "\uf07d"
                     label: BarState.vertical ? "Horizontal bar" : "Vertical bar"
                     onTriggered: BarState.toggle()
+                }
+                Entry {
+                    // Says where a click takes you: sun while dark, moon while light
+                    glyph: Theme.dark ? "\uf185" : "\uf186"
+                    label: Theme.dark ? "Light theme" : "Dark theme"
+                    onTriggered: Theme.toggle()
                 }
                 Entry {
                     glyph: "\uf01e"; label: "Restart shell"

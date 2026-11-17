@@ -33,4 +33,15 @@ ShellRoot {
         function vertical(): void   { BarState.setVertical() }
         function horizontal(): void { BarState.setHorizontal() }
     }
+
+    // Theme switch (bar and dock both follow):
+    //   qs ipc call theme toggle
+    //   qs ipc call theme dark
+    //   qs ipc call theme light
+    IpcHandler {
+        target: "theme"
+        function toggle(): void { Theme.toggle() }
+        function dark(): void   { Theme.setDark(true) }
+        function light(): void  { Theme.setDark(false) }
+    }
 }

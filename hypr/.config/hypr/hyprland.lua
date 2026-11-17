@@ -28,7 +28,7 @@ hl.monitor({
 
 -- Set programs that you use
 local terminal    = "kitty"
-local browser     = "flatpak run app.zen_browser.zen"
+local browser     = "zen-browser"
 local notes       = "obsidian"
 local games       = "steam"
 local fileManager = "kitty -e zsh -ic yazi"
@@ -248,8 +248,8 @@ hl.config({
 
 hl.config({
     misc = {
-        force_default_wallpaper = -1,    -- Set to 0 or 1 to disable the anime mascot wallpapers
-        disable_hyprland_logo   = false, -- If true disables the random hyprland logo / anime girl background. :(
+        force_default_wallpaper = 0,    -- Set to 0 or 1 to disable the anime mascot wallpapers
+        disable_hyprland_logo   = true, -- If true disables the random hyprland logo / anime girl background. :(
     },
 })
 
@@ -329,6 +329,9 @@ hl.bind(mainMod .. " + V", hl.dsp.exec_cmd("qs -p /home/crowley/.config/quickshe
 --dock
 hl.bind(mainMod .. "+ d", hl.dsp.exec_cmd("qs -p /home/crowley/.config/quickshell/dock ipc call dock toggle"))
 
+--app launcher call
+hl.bind(mainMod .. "+ q", hl.dsp.exec_cmd("qs -p ~/.config/quickshell/dock ipc call dock launcher"))
+
 -- HorizontalxVertical Bar
 hl.bind(mainMod .. "+ h", hl.dsp.exec_cmd("qs ipc call bar toggle"))
 
@@ -369,8 +372,8 @@ hl.bind(mainMod .. " + S",         hl.dsp.workspace.toggle_special("magic"))
 hl.bind(mainMod .. " + SHIFT + S", hl.dsp.window.move({ workspace = "special:magic" }))
 
 -- Scroll through existing workspaces with mainMod + scroll
-hl.bind(mainMod .. " + mouse_down", hl.dsp.focus({ workspace = "e+1" }))
-hl.bind(mainMod .. " + mouse_up",   hl.dsp.focus({ workspace = "e-1" }))
+hl.bind(mainMod .. " + mouse_down", hl.dsp.focus({ workspace = "+1" }))
+hl.bind(mainMod .. " + mouse_up",   hl.dsp.focus({ workspace = "-1" }))
 
 -- Move/resize windows with mainMod + LMB/RMB and dragging
 hl.bind(mainMod .. " + mouse:272", hl.dsp.window.drag(),   { mouse = true })
@@ -493,6 +496,26 @@ hl.window_rule({
 	match = {class = "steam_app_2252283979",},
 	workspace = "special:magic",
 })
+
+
+-- Crossfade do Wallpaper
+-- -------------------------
+
+-- 1. Define the fade animation for layers
+hl.animation({
+    leaf = "fadeLayers",
+    enabled = true,
+    speed = 100,
+    bezier = "default",
+})
+
+-- 2. Apply the 'fade' animation to the hyprpaper layer
+hl.layer_rule({
+    name = "wallpaper-crossfade",
+    match = { namespace = "^hyprpaper$" },
+    animation = "fade",
+})
+
 
 -- WORKSPACES RULES HERE
 -- ---------------------------

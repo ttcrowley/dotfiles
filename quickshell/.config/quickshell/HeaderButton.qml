@@ -6,7 +6,7 @@ Rectangle {
 
     property string label
     property bool active: false
-    property int cornerRadius: 6
+    property int cornerRadius: Theme.radiusSmall
     signal clicked
 
     implicitWidth: hbText.implicitWidth + 16

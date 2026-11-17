@@ -1,0 +1,42 @@
+:root {
+  --qs-bg:       #0C0C0C;
+  --qs-surface:  #2C2C2C;
+  --qs-border:   #4E4E4E;
+  --qs-dim:      #747474;
+  --qs-muted:    #A4A4A4;
+  --qs-fg:       #DFDFDF;
+  --qs-accent:   #FFFFFF;
+
+  --zen-main-browser-background: var(--qs-bg) !important;
+  --zen-themed-toolbar-bg:       var(--qs-bg) !important;
+  --zen-colors-primary:          var(--qs-surface) !important;
+  --zen-colors-border:           var(--qs-border) !important;
+
+  color-scheme: dark;
+
+  --toolbar-bgcolor: var(--qs-bg) !important;
+  --toolbar-color:   var(--qs-fg) !important;
+  --lwt-accent-color: var(--qs-bg) !important;
+  --lwt-text-color:   var(--qs-fg) !important;
+
+  --tab-selected-bgcolor:   var(--qs-surface) !important;
+  --tab-selected-textcolor: var(--qs-fg) !important;
+
+  --arrowpanel-background:   var(--qs-surface) !important;
+  --arrowpanel-color:        var(--qs-fg) !important;
+  --arrowpanel-border-color: var(--qs-border) !important;
+}
+
+#navigator-toolbox { background-color: var(--qs-bg) !important; color: var(--qs-fg) !important; }
+#urlbar-background { background-color: var(--qs-surface) !important; border: 1px solid var(--qs-border) !important; }
+
+#zen-browser-background,
+.zen-browser-generic-background {
+  --zen-main-browser-background:     var(--qs-bg) !important;
+  --zen-main-browser-background-old: var(--qs-bg) !important;
+  background: var(--qs-bg) !important;
+}
+
+zen-workspace {
+  --toolbox-textcolor: var(--qs-fg) !important;
+}

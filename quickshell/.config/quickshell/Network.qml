@@ -28,31 +28,38 @@ Item {
         }
     }
 
-
+    // `nmcli monitor` prints a line on every connection change, which triggers a refresh
     Process {
-    command: ["nmcli", "monitor"]
-    running: true
-    stdout: SplitParser {
-        onRead: proc.running = true
+        command: ["nmcli", "monitor"]
+        running: true
+        stdout: SplitParser {
+            onRead: proc.running = true
+        }
     }
-}
 
+    // Slow safety net in case the monitor process dies or misses an event
     Timer {
-        interval: 1000; running: true; repeat: true; triggeredOnStart: true
+        interval: 30000; running: true; repeat: true; triggeredOnStart: true
         onTriggered: proc.running = true
     }
 
-Text {
-    id: label
-    text: root.kind === "wifi" ? "\uf1eb"
-        : root.kind === "ethernet" ? "\udb83\udc9d"
-        : "\uf071"
-	color: root.kind === "none" ? Theme.warn : Theme.connected
-	font { family: Theme.font; pixelSize: Theme.fontSize + 2 }
-}
+    Text {
+        id: label
+        text: root.kind === "wifi" ? "\uf1eb"
+            : root.kind === "ethernet" ? "\udb83\udc9d"
+            : "\uf071"
+        color: root.kind === "none" ? Theme.warn
+             : area.containsMouse ? Theme.accent
+             : Theme.connected
+        Behavior on color { ColorAnimation { duration: Theme.animFast } }
+        font { family: Theme.font; pixelSize: Theme.fontSize + 2 }
+    }
 
     MouseArea {
+        id: area
         anchors.fill: parent
+        hoverEnabled: true
+        cursorShape: Qt.PointingHandCursor
         onClicked: Quickshell.execDetached(["nm-connection-editor"])
     }
 }

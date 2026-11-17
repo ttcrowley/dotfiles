@@ -1,0 +1,58 @@
+/* Minimal theme colors from Theme.qml (dark). theme-apply builds the light version.
+   Only palette colors go in this file; the light value of each comes from Theme.qml. */
+html body.theme-light,
+html body.theme-dark {
+    /* backgrounds */
+    --bg1: #0C0C0C !important;
+    --bg2: #0C0C0C !important;
+    --bg3: #2C2C2C !important;
+
+    /* borders / UI */
+    --ui1: #2C2C2C !important;
+    --ui2: #4E4E4E !important;
+    --ui3: #747474 !important;
+
+    /* text */
+    --tx1: #DFDFDF !important;
+    --tx2: #A4A4A4 !important;
+    --tx3: #747474 !important;
+
+    /* accent (links, active items) */
+    --ax1: #FFFFFF !important;
+    --ax2: #DFDFDF !important;
+    --ax3: #A4A4A4 !important;
+    --text-on-accent: #0C0C0C !important;
+
+    /* text selection */
+    --hl1: #4E4E4E !important;
+
+    /* bold text and ==highlights== */
+    --bold-color: #7FB8BF !important;
+    --hl2: color-mix(in srgb, #C2B67E 35%, transparent) !important;
+    --text-highlight-bg: color-mix(in srgb, #C2B67E 35%, transparent) !important;
+    --highlight-background: color-mix(in srgb, #C2B67E 35%, transparent) !important;
+    --text-highlight-bg-active: color-mix(in srgb, #C2B67E 55%, transparent) !important;
+
+    /* muted colors */
+    --red: #C78A8E !important;
+    --green: #8FB996 !important;
+    --yellow: #C2B67E !important;
+    --cyan: #7FB8BF !important;
+}
+
+/* Applied straight to the elements, so it holds wherever the theme sets these colors */
+html body strong,
+html body b,
+html body .cm-strong,
+html body span.cm-strong {
+    color: #7FB8BF !important;
+}
+
+html body mark,
+html body .cm-highlight,
+html body span.cm-highlight,
+html body .cm-s-obsidian span.cm-highlight,
+html body .cm-s-obsidian span.cm-formatting-highlight {
+    background-color: color-mix(in srgb, #C2B67E 35%, transparent) !important;
+    color: #DFDFDF !important;
+}

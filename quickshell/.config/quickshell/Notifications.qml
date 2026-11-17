@@ -36,7 +36,7 @@ Scope {
 
     property int cardWidth: 340
     property int gap: 8
-    property int radius: 10
+    property int radius: Theme.radius
     property int defaultTimeout: 5000   // ms, when the app doesn't ask for one
 
     // Most popups on screen at once. Older ones slide away into the history.
@@ -262,7 +262,7 @@ command: ["sh", "-c",
 
                     Behavior on height {
                         NumberAnimation {
-                            duration: 220
+                            duration: Theme.animMed
                             easing.type: Easing.OutCubic
                         }
                     }
@@ -306,7 +306,7 @@ command: ["sh", "-c",
                         y: entry.open ? 0 : -(height + root.gap)
                         Behavior on y {
                             NumberAnimation {
-                                duration: 220
+                                duration: Theme.animMed
                                 easing.type: entry.open ? Easing.OutCubic : Easing.InCubic
                             }
                         }
@@ -489,7 +489,7 @@ command: ["sh", "-c",
         property real slide: NotifState.historyOpen ? 1 : 0
         Behavior on slide {
             NumberAnimation {
-                duration: 220
+                duration: Theme.animMed
                 easing.type: NotifState.historyOpen ? Easing.OutCubic : Easing.InCubic
             }
         }

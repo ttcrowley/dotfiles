@@ -69,7 +69,7 @@ PanelWindow {
             // Horizontal only: hide while the clock shows the date so they never overlap
             opacity: (!bar.vertical && clock.hovered) ? 0 : 1
             enabled: bar.vertical || !clock.hovered
-            Behavior on opacity { NumberAnimation { duration: 150 } }
+            Behavior on opacity { NumberAnimation { duration: Theme.animFast } }
         }
 
         // ── End: bottom (vertical) / right (horizontal) ──
@@ -82,10 +82,8 @@ PanelWindow {
             Stats {}
             Volume {}
             Network {}
-	    ExtraButtons {}            
-	    PowerMenu {}
+            ExtraButtons {}
+            PowerMenu {}
         }
     }
 }
-
-

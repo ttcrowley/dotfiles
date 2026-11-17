@@ -195,12 +195,17 @@ Scope {
                     height: root.iconSize + 40
                     x: (parent.width - width) / 2
                     y: win.revealed ? parent.height - height - root.bottomMargin : parent.height + 6
-                    radius: 14
+                    radius: Theme.radius
+                    // while the launcher list is attached above, the top corners go square
+                    topLeftRadius: win.launcherOpen ? 0 : Theme.radius
+                    topRightRadius: win.launcherOpen ? 0 : Theme.radius
                     color: Theme.bg
                     border.width: 1
                     border.color: Theme.border
 
                     Behavior on y { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
+                    Behavior on topLeftRadius { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
+                    Behavior on topRightRadius { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
 
                     // Mouse wheel over the dock cycles through the states (wheel down = next, loops)
                     WheelHandler {
@@ -269,7 +274,7 @@ Scope {
                                     y: 6
                                     width: parent.width
                                     height: root.iconSize
-                                    radius: 12
+                                    radius: Theme.radius - 2
                                     color: Theme.surface
                                     border.width: 1
                                     // idle: border blends into the fill; focused: a quiet mid-gray line
@@ -472,7 +477,7 @@ Scope {
                     height: win.menuOpen ? menuCol.implicitHeight + 16 : 0
                     x: Math.max(8, Math.min(parent.width - width - 8, win.menuCenterX - width / 2))
                     y: dock.y - height - 8
-                    radius: 12
+                    radius: Theme.radius
                     color: Theme.bg
                     border.width: 1
                     border.color: Theme.border
@@ -504,7 +509,7 @@ Scope {
                                 Rectangle {
                                     visible: menuRow.modelData.sep !== true
                                     anchors.fill: parent
-                                    radius: 6
+                                    radius: Theme.radiusSmall
                                     color: rowMouse.containsMouse ? Theme.surface : "transparent"
 
                                     Text {
@@ -549,11 +554,15 @@ Scope {
 
                     opacity: win.launcherOpen ? 1 : 0
                     visible: live
-                    width: live ? 460 : 0
+                    // same width as the dock in search state, so the two read as one panel
+                    width: live ? root.searchWidth + 56 : 0
                     height: live ? rows * root.resultHeight + (rows - 1) * 2 + 24 : 0
                     x: Math.max(8, Math.min(parent.width - width - 8, anchorX - width / 2))
-                    y: dock.y - height - 8
-                    radius: 14
+                    // +1 overlaps the two borders; `seam` below paints over them with a soft line
+                    y: dock.y - height + 1
+                    radius: Theme.radius
+                    bottomLeftRadius: 0
+                    bottomRightRadius: 0
                     color: Theme.bg
                     border.width: 1
                     border.color: Theme.border
@@ -695,6 +704,31 @@ Scope {
                                     }
                                 }
                             }
+                        }
+                    }
+                }
+
+                // Soft separator between the search dock and the results list.
+                // Paints over the two overlapping borders (inset 1px so the side borders
+                // stay continuous) and draws a faint line that fades out toward the edges.
+                Rectangle {
+                    id: seam
+                    visible: popup.live
+                    opacity: popup.opacity
+                    x: popup.x + 1
+                    y: dock.y
+                    width: popup.width - 2
+                    height: 1
+                    color: Theme.bg
+
+                    Rectangle {
+                        anchors.fill: parent
+                        gradient: Gradient {
+                            orientation: Gradient.Horizontal
+                            GradientStop { position: 0.0;  color: Qt.alpha(Theme.surface, 0) }
+                            GradientStop { position: 0.25; color: Theme.surface }
+                            GradientStop { position: 0.75; color: Theme.surface }
+                            GradientStop { position: 1.0;  color: Qt.alpha(Theme.surface, 0) }
                         }
                     }
                 }

@@ -17,7 +17,7 @@ Item {
     readonly property real neck: 1.2     // smaller = thinner waist between dots
     readonly property real sinA: 0.8     // where necks meet the circles (~55 deg)
     readonly property real cosA: 0.6
-    readonly property int animMs: 220
+    readonly property int animMs: Theme.animMed
 
     // ── State ───────────────────────────────────────────────
     readonly property int focusedId: Hyprland.focusedWorkspace?.id ?? -1
@@ -29,45 +29,44 @@ Item {
     readonly property color alertColor: Theme.warn   // try Theme.yellow for something softer
     readonly property int pulseMs: 1100
 
-	function alert(ws) {
-	    if (isNaN(ws) || ws === focusedId || alerts[ws] === true)
-		return;
-	    alerts = Object.assign({}, alerts, { [ws]: true });
-	}
+    function alert(ws) {
+        if (isNaN(ws) || ws === focusedId || alerts[ws] === true)
+            return;
+        alerts = Object.assign({}, alerts, { [ws]: true });
+    }
 
-	function clearAlert(ws) {
-	    if (alerts[ws] !== true)
-		return;
-	    const next = Object.assign({}, alerts);
-	    delete next[ws];
-	    alerts = next;
-	}
+    function clearAlert(ws) {
+        if (alerts[ws] !== true)
+            return;
+        const next = Object.assign({}, alerts);
+        delete next[ws];
+        alerts = next;
+    }
 
-	onFocusedIdChanged: clearAlert(focusedId)
+    onFocusedIdChanged: clearAlert(focusedId)
 
-	Connections {
-	    target: Hyprland
+    Connections {
+        target: Hyprland
 
-	    function onRawEvent(event) {
-		// console.log("hypr:", event.name, event.data);   // uncomment to debug
+        function onRawEvent(event) {
+            // console.log("hypr:", event.name, event.data);   // uncomment to debug
 
-		// A window opened (e.g. Obsidian on another workspace).
-		// data = "address,workspaceName,class,title"
-		if (event.name === "openwindow") {
-		    root.alert(parseInt(event.data.split(",")[1]));
-		}
-		// A window asked for attention (e.g. a paused game wanting focus).
-		// data = window address
-		else if (event.name === "urgent") {
-		    const addr = event.data.trim().replace(/^0x/, "");
-		    const t = Hyprland.toplevels.values.find(
-			t => t.address.replace(/^0x/, "") === addr);
-		    if (t && t.workspace)
-			root.alert(t.workspace.id);
-		}
-	    }
-	}
-
+            // A window opened (e.g. Obsidian on another workspace).
+            // data = "address,workspaceName,class,title"
+            if (event.name === "openwindow") {
+                root.alert(parseInt(event.data.split(",")[1]));
+            }
+            // A window asked for attention (e.g. a paused game wanting focus).
+            // data = window address
+            else if (event.name === "urgent") {
+                const addr = event.data.trim().replace(/^0x/, "");
+                const t = Hyprland.toplevels.values.find(
+                    t => t.address.replace(/^0x/, "") === addr);
+                if (t && t.workspace)
+                    root.alert(t.workspace.id);
+            }
+        }
+    }
 
     // Same visibility rule as before: 1-4 always, others if focused/occupied
     readonly property var shown: {
@@ -112,6 +111,11 @@ Item {
             anchors.fill: parent
             antialiasing: true
             preferredRendererType: Shape.CurveRenderer   // Qt 6.6+; delete this line if it errors
+
+            // Fades in when a workspace appears (5-9 show up on demand)
+            opacity: 0
+            Component.onCompleted: opacity = 1
+            Behavior on opacity { NumberAnimation { duration: Theme.animMed } }
 
             readonly property real mid: root.cross / 2
             readonly property real a1: root.slot * (index + 0.5)
@@ -165,35 +169,41 @@ Item {
             x: root.px(root.slot * (index + 0.5), root.cross / 2) - width / 2
             y: root.py(root.slot * (index + 0.5), root.cross / 2) - height / 2
 
-           readonly property bool alerted: root.alerts[wsId] === true && !focused
-	property real pulse: 0
+            readonly property bool alerted: root.alerts[wsId] === true && !focused
+            property real pulse: 0
 
-	color: alerted ? root.alertColor
-	     : focused ? Theme.accent
-	     : occupied ? Theme.muted
-	     : Theme.border
-	Behavior on color { ColorAnimation { duration: 150 } }
+            color: alerted ? root.alertColor
+                 : focused ? Theme.accent
+                 : occupied ? Theme.muted
+                 : Theme.border
+            Behavior on color { ColorAnimation { duration: Theme.animFast } }
 
-	NumberAnimation on pulse {
-	    from: 0
-	    to: 1
-	    duration: root.pulseMs
-	    loops: Animation.Infinite
-	    running: dot.alerted
-	}
+            // Fades in when a workspace appears (5-9 show up on demand)
+            opacity: 0
+            Component.onCompleted: opacity = 1
+            Behavior on opacity { NumberAnimation { duration: Theme.animMed } }
 
-// Expanding, fading ring
-Rectangle {
-    visible: dot.alerted
-    anchors.centerIn: parent
-    width: dot.width + 12 * dot.pulse
-    height: width
-    radius: width / 2
-    color: "transparent"
-    border.width: 1.5
-    border.color: root.alertColor
-    opacity: 1 - dot.pulse
-}        }
+            NumberAnimation on pulse {
+                from: 0
+                to: 1
+                duration: root.pulseMs
+                loops: Animation.Infinite
+                running: dot.alerted
+            }
+
+            // Expanding, fading ring
+            Rectangle {
+                visible: dot.alerted
+                anchors.centerIn: parent
+                width: dot.width + 12 * dot.pulse
+                height: width
+                radius: width / 2
+                color: "transparent"
+                border.width: 1.5
+                border.color: root.alertColor
+                opacity: 1 - dot.pulse
+            }
+        }
     }
 
     // ── Click targets ───────────────────────────────────────
@@ -214,13 +224,21 @@ Rectangle {
         }
     }
 
-    WheelHandler {
-        onWheel: event => {
-            const dir = event.angleDelta.y > 0 ? "-1" : "+1"
-            Quickshell.execDetached([
-                "hyprctl", "dispatch",
-                'hl.dsp.focus({ workspace = "' + dir + '" })'
-            ])
-        }
+    // Wheel over the dots (a bit taller than the dots themselves) switches workspace
+Timer { id: wheelGate; interval: 120 }
+
+MouseArea {
+    anchors.fill: parent
+    anchors.topMargin: -8
+    anchors.bottomMargin: -8
+    acceptedButtons: Qt.NoButton   // clicks still reach the dots below
+    onWheel: wheel => {
+        if (wheelGate.running || wheel.angleDelta.y === 0) return
+        wheelGate.restart()
+        const dir = wheel.angleDelta.y > 0 ? "-1" : "+1"
+        Quickshell.execDetached([
+            "hyprctl", "dispatch",
+            'hl.dsp.focus({ workspace = "' + dir + '" })'
+        ])
     }
-}
+}}

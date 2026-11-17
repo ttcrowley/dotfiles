@@ -27,7 +27,7 @@ Item {
              : root.open ? Theme.accent
              : Theme.dim
         font { family: Theme.font; pixelSize: Theme.fontSize + 2}
-        Behavior on color { ColorAnimation { duration: 150 } }
+        Behavior on color { ColorAnimation { duration: Theme.animFast } }
     }
 
     MouseArea {
@@ -48,7 +48,7 @@ Item {
 
         width: parent.width
         height: 32
-        radius: 6
+        radius: Theme.radiusSmall
         color: area.containsMouse ? Theme.border : "transparent"
 
         Row {
@@ -111,7 +111,7 @@ Item {
             y: root.vertical ? parent.height - height - root.menuBottom : root.menuTop
             width: 170
             height: menu.implicitHeight + 16
-            radius: 10
+            radius: Theme.radius
             color: Theme.surface
             border { color: Theme.border; width: 1 }
 

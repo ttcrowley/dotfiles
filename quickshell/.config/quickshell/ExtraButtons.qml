@@ -61,7 +61,7 @@ Item {
 
             Behavior on implicitWidth  { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
             Behavior on implicitHeight { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
-            Behavior on opacity        { NumberAnimation { duration: 150 } }
+            Behavior on opacity        { NumberAnimation { duration: Theme.animFast } }
 
             Grid {
                 id: content
@@ -88,7 +88,7 @@ Item {
                     : (root.expanded ? "\uf105" : "\uf104")
                 color: area.containsMouse || root.expanded ? Theme.fg : Theme.dim
                 font { family: Theme.font; pixelSize: Theme.fontSize + 2 }
-                Behavior on color { ColorAnimation { duration: 150 } }
+                Behavior on color { ColorAnimation { duration: Theme.animFast } }
             }
 
             // Unread notifications while the drawer is tucked away
