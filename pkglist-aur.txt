@@ -10,4 +10,5 @@ qview
 tela-icon-theme-git
 xdg-desktop-portal-termfilechooser-hunkyburrito-git
 yay-bin
+zen-browser-bin
 zsh-theme-powerlevel10k-git
