@@ -58,3 +58,10 @@ vim.api.nvim_set_hl(0, "VertSplit", { fg = colors.color8 })
 vim.wo.number = true          -- Show absolute line numbers
 vim.wo.relativenumber = true  -- Show relative line numbers (hybrid mode)
 
+vim.cmd.colorscheme("qs")
+
+-- Reload the colorscheme when theme-apply sends SIGUSR1
+vim.api.nvim_create_autocmd("Signal", {
+  pattern = "SIGUSR1",
+  callback = function() vim.cmd.colorscheme("qs") end,
+})
